@@ -369,12 +369,18 @@ void iplc_sim_process_pipeline_syscall( )
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+
+  pipeline[FETCH].itype = SYSCALL;
+  pipeline[FETCH].instruction_address = instruction_address;
 }
 
 void iplc_sim_process_pipeline_nop( )
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+
+  pipeline[FETCH].itype = NOP;
+  pipeline[FETCH].instruction_address = instruction_address;
 }
 
 /************************************************************************************************/
