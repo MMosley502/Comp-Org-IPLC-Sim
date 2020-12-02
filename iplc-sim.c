@@ -296,7 +296,10 @@ void iplc_sim_push_pipeline_stage()
    */
 
   /* 4. Check for SW mem acess and data miss .. add delay cycles if needed */
+	
   /* 5. Increment pipe_cycles 1 cycle for normal processing */
+  pipeline_cycles++;
+	
   /* 6. push stages thru MEM->WB, ALU->MEM, DECODE->ALU, FETCH->ALU */
   
   // 7. This is a give'me -- Reset the FETCH stage to NOP via bezero */
@@ -320,31 +323,37 @@ void iplc_sim_process_pipeline_rtype( char *instruction, int dest_reg, int reg1,
 void iplc_sim_process_pipeline_lw( int dest_reg, int base_reg, unsigned int data_address)
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 void iplc_sim_process_pipeline_sw( int src_reg, int base_reg, unsigned int data_address)
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 void iplc_sim_process_pipeline_branch( int reg1, int reg2)
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 void iplc_sim_process_pipeline_jump( char *instruction )
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 void iplc_sim_process_pipeline_syscall( )
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 void iplc_sim_process_pipeline_nop( )
 {
   /* you gotta do this one */
+  iplc_sim_push_pipeline_stage();
 }
 
 /************************************************************************************************/
