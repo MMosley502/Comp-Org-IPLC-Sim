@@ -288,7 +288,7 @@ void iplc_sim_push_pipeline_stage()
 	       pipeline[WRITEBACK].instruction_address, pipeline[WRITEBACK].itype, pipeline_cycles );
     }
 
-  
+	// WORK ON THIS
   /* 2. Check for BRANCH and correct/incorrect Branch Prediction */
 
   /* 3. Check for LW delays due to use in ALU stage and if data hit/miss  
@@ -319,7 +319,7 @@ void iplc_sim_process_pipeline_rtype( char *instruction, int dest_reg, int reg1,
   pipeline[FETCH].stage.rtype.reg2_or_constant = reg2_or_constant;
   pipeline[FETCH].stage.rtype.dest_reg = dest_reg;
 }
-
+// WORK ON THESE
 void iplc_sim_process_pipeline_lw( int dest_reg, int base_reg, unsigned int data_address)
 {
   /* you gotta do this one */
