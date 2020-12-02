@@ -188,6 +188,7 @@ void iplc_sim_init( int index, int blocksize, int assoc )
      }
    }
 
+   // WORK ON THESE
 void iplc_sim_LRU_replace_on_miss( int index, int tag )
    {
    int i=0, j=0;
