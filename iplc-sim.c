@@ -325,18 +325,34 @@ void iplc_sim_process_pipeline_lw( int dest_reg, int base_reg, unsigned int data
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+  
+  
+  
 }
 
 void iplc_sim_process_pipeline_sw( int src_reg, int base_reg, unsigned int data_address)
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+  
+  pipeline[FETCH].itype = SW;
+  pipeline[FETCH].instruction_address = instruction_address;
+  
+  pipeline[FETCH].stage.sw.data_address = data_address;
+  pipeline[FETCH].stage.sw.dest_reg = src_reg;
+  pipeline[FETCH].stage.sw.base_reg = base_reg;
 }
 
 void iplc_sim_process_pipeline_branch( int reg1, int reg2)
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+  
+  pipeline[FETCH].itype = BRANCH;
+  pipeline[FETCH].instruction_address = instruction_address;
+  
+  pipeline[FETCH].stage.branch.reg1 = reg1;
+  pipeline[FETCH].stage.branch.reg2 = reg2;
 }
 
 void iplc_sim_process_pipeline_jump( char *instruction )
