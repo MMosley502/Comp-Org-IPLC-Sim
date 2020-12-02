@@ -363,6 +363,11 @@ void iplc_sim_process_pipeline_jump( char *instruction )
 {
   /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
+
+  pipeline[FETCH].itype = JUMP;
+  pipeline[FETCH].instruction_address = instruction_address;
+
+  strcpy(pipeline[FETCH].stage.jump.instruction, instruction);
 }
 
 void iplc_sim_process_pipeline_syscall( )
