@@ -291,6 +291,14 @@ void iplc_sim_push_pipeline_stage()
 
 	// WORK ON THIS
   /* 2. Check for BRANCH and correct/incorrect Branch Prediction */
+  if (pipeline[DECODE].stage.reg1 == pipeline[ALU].stage.dest_reg || 
+			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg ||
+			pipeline[DECODE].stage.reg1 == pipeline[MEM].stage.dest_reg ||
+			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg) {
+	// Something neeeds to be added here
+	// pipe_cycles += 10;
+	}
+			
 
   /* 3. Check for LW delays due to use in ALU stage and if data hit/miss  
    *    add delay cycles if needed.
