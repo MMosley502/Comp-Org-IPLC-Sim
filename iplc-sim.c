@@ -306,7 +306,7 @@ void iplc_sim_push_pipeline_stage()
 			pipeline[DECODE].stage.reg1 == pipeline[MEM].stage.dest_reg ||
 			pipeline[DECODE].stage.reg2 == pipeline[MEM].stage.dest_reg)
 			{
-			pipe_cycles += CACHE_MISS_DELAY - 1;
+			pipeline_cycles += CACHE_MISS_DELAY - 1;
 			}
 	    }
 	if(pipeline[MEM].itype == LW)
@@ -315,9 +315,12 @@ void iplc_sim_push_pipeline_stage()
 			{
 			pipeline_cycles += CACHE_MISS_DELAY - 1;
 			//Need to add debug here?
+			if (debug) 
+				{
+				printf("Data miss at Address 0x%a\n", pipeline[MEM].stage.lw.data_address);
+				}
 			}
 		}
-
   /* 4. Check for SW mem acess and data miss .. add delay cycles if needed */
   // Should this be WRITEBACK?
 	if(pipeline[MEM].itype == SW)
@@ -326,6 +329,10 @@ void iplc_sim_push_pipeline_stage()
 			{
 			pipeline_cycles += CACHE_MISS_DELAY - 1;
 			//Need to add debug here?
+			if(debug)
+				{
+				printf("Data miss at Adress 0x%a\n", pipeline[MEM].stage.sw.data_address);
+				}
 			}
 		}				
   /* 5. Increment pipe_cycles 1 cycle for normal processing */
