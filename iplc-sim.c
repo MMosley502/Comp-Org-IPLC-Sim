@@ -291,20 +291,35 @@ void iplc_sim_push_pipeline_stage()
 
 	// WORK ON THIS
   /* 2. Check for BRANCH and correct/incorrect Branch Prediction */
-  if (pipeline[DECODE].stage.reg1 == pipeline[ALU].stage.dest_reg || 
-			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg ||
-			pipeline[DECODE].stage.reg1 == pipeline[MEM].stage.dest_reg ||
-			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg) {
-	// Something neeeds to be added here
-	// pipe_cycles += 10;
-	}
+  
 			
 
   /* 3. Check for LW delays due to use in ALU stage and if data hit/miss  
    *    add delay cycles if needed.
    */
+   
+   if(pipeline[ALU].itype == LW)
+		{
+			// this should check for ALU delays but i'm not certain.
+		if (pipeline[DECODE].stage.reg1 == pipeline[ALU].stage.dest_reg || 
+			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg ||
+			pipeline[DECODE].stage.reg1 == pipeline[MEM].stage.dest_reg ||
+			pipeline[DECODE].stage.reg2 == pipeline[MEM].stage.dest_reg)
+			{
+			pipe_cycles += CACHE_MISS_DELAY - 1;
+			}
+	    }
+	if(pipeline[MEM].itype == LW)
+		{
+		if(!iplc_sim_trap_address(pipeline[MEM].stage.lw.data_address))
+			{
+			pipeline_cycles += CACHE_MISS_DELAY - 1;
+			//Need to add debug here?
+			}
+		}
 
   /* 4. Check for SW mem acess and data miss .. add delay cycles if needed */
+  // Should this be WRITEBACK?
 	if(pipeline[MEM].itype == SW)
 		{
 		if(!iplc_sim_trap_address(pipeline[MEM].stage.sw.data_address))
