@@ -205,13 +205,12 @@ void iplc_sim_LRU_replace_on_miss( int index, int tag )
 
 void iplc_sim_LRU_update_on_hit( int index, int assoc )
 {
-   int i=0, j=0;
-   i = assoc + i;
+   int i=0;
    // Move to MRU
    assoc_t newLine = cache[index].assoc[assoc];
    
    // Move all lines down to add new line
-   for (i = assoc + i; i < cache_assoc; i++)
+   for (i=0; i < cache_assoc; i++)
 	{
 	   cache[index].assoc[i-1] = cache[index].assoc[i];
 	}
@@ -235,7 +234,7 @@ int iplc_sim_trap_address( unsigned int address )
    tag = address >> (cache_blockoffsetbits + cache_index);
    
    // check associated 
-   for (i = 0; i < cache_assoc; i++)
+   for (i=0;i < cache_assoc; i++)
    {
 		// Determines cache hit
 		if (cache[index].assoc[i].vb && cache[index].assoc[i].tag == tag)
@@ -354,37 +353,30 @@ void iplc_sim_push_pipeline_stage()
   /* 3. Check for LW delays due to use in ALU stage and if data hit/miss  
    *    add delay cycles if needed.
    */
+
+  if (pipeline[MEM].itype == LW) {
+        int inserted_nop = 0;
+        // Insert a delay if the destination register is being used in another instruction in the ALU stage
+        if(pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg1 ||
+                pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg2_or_constant ||
+                pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.data_address ||
+                pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.base_reg ||
+                pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.data_address ||
+                pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.base_reg) {
+            inserted_nop = 1;
+        }
+
+        // Also check for a data miss and increase the delay if a memory access is needed.
+        if(! iplc_sim_trap_address(pipeline[MEM].stage.sw.data_address)) {
+            inserted_nop = CACHE_MISS_DELAY - 1;
+        }
+
+        pipeline_cycles += inserted_nop;
+    }
+
    
-   if(pipeline[MEM].itype == LW)
-	{
-			// add delay if destination register is being used in the ALU stage 
-		if (pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg1 || 
-			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg2_or_constant ||
-			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.data_address ||
-			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.base_reg ||
-			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.data_address ||
-			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.base_reg)
-		{
-			inserted_nop = 1;
-	    }
-		
-		
-		
-		// check for data miss and add delay if necessary 
+
 	
-		if(!iplc_sim_trap_address(pipeline[MEM].stage.lw.data_address))
-		{
-			inserted_nop = CACHE_MISS_DELAY - 1;
-			//Need to add debug here?
-			if (debug) 
-			{
-				printf("Data miss at Address 0x%a\n", pipeline[MEM].stage.lw.data_address);
-			}
-		}
-		
-		pipeline_cycles += inserted_nop;
-		
-	}
   /* 4. Check for SW mem acess and data miss .. add delay cycles if needed */
   // Should this be WRITEBACK?
 	if(pipeline[MEM].itype == SW)
@@ -392,11 +384,6 @@ void iplc_sim_push_pipeline_stage()
 		if(!iplc_sim_trap_address(pipeline[MEM].stage.sw.data_address))
 			{
 			pipeline_cycles += CACHE_MISS_DELAY - 1;
-			//Need to add debug here?
-			if(debug)
-				{
-				printf("Data miss at Adress 0x%a\n", pipeline[MEM].stage.sw.data_address);
-				}
 			}
 		}				
   /* 5. Increment pipe_cycles 1 cycle for normal processing */
@@ -510,7 +497,7 @@ unsigned int iplc_sim_parse_reg( char *reg_str )
     {
       // copy down over $ character than return atoi
       for( i = 0; i < strlen(reg_str); i++ )
-	reg_str[i] = reg_str[i+1];
+  reg_str[i] = reg_str[i+1];
 
       return( atoi( reg_str) );
     }
@@ -546,7 +533,7 @@ void iplc_sim_parse_instruction( char *buffer )
       printf("INST MISS:\t Address 0x%x \n", instruction_address );      
 
       for( i = pipeline_cycles, j = pipeline_cycles; i < j + CACHE_MISS_DELAY - 1; i++ )
-	iplc_sim_push_pipeline_stage();
+  iplc_sim_push_pipeline_stage();
     }
   else
     printf("INST HIT:\t Address 0x%x \n", instruction_address );      
@@ -558,16 +545,16 @@ void iplc_sim_parse_instruction( char *buffer )
       strncmp( instruction, "ori", 3 ) == 0  )
     {
       if( sscanf(buffer, "%x %s %s %s %s", 
-		 &instruction_address, 
-		 instruction, 
-		 str_dest_reg, 
-		 str_src_reg, 
-		 str_src_reg2 ) != 5 )
-	{
-	  printf("Malformed RTYPE instruction (%s) at address 0x%x \n", 
-		 instruction, instruction_address );
-	  exit(-1);
-	}
+     &instruction_address, 
+     instruction, 
+     str_dest_reg, 
+     str_src_reg, 
+     str_src_reg2 ) != 5 )
+  {
+    printf("Malformed RTYPE instruction (%s) at address 0x%x \n", 
+     instruction, instruction_address );
+    exit(-1);
+  }
 
       dest_reg = iplc_sim_parse_reg( str_dest_reg );
       src_reg = iplc_sim_parse_reg( str_src_reg );
@@ -579,15 +566,15 @@ void iplc_sim_parse_instruction( char *buffer )
   else if( strncmp( instruction, "lui", 3 ) == 0 )
     {
       if( sscanf(buffer, "%x %s %s %s", 
-		 &instruction_address, 
-		 instruction, 
-		 str_dest_reg, 
-		 str_constant ) != 4 )
-	{
-	  printf("Malformed RTYPE instruction (%s) at address 0x%x \n", 
-		 instruction, instruction_address );
-	  exit(-1);
-	}
+     &instruction_address, 
+     instruction, 
+     str_dest_reg, 
+     str_constant ) != 4 )
+  {
+    printf("Malformed RTYPE instruction (%s) at address 0x%x \n", 
+     instruction, instruction_address );
+    exit(-1);
+  }
 
       dest_reg = iplc_sim_parse_reg( str_dest_reg );
       src_reg = -1;
@@ -596,34 +583,34 @@ void iplc_sim_parse_instruction( char *buffer )
     }
 
   else if( strncmp( instruction, "lw", 2 ) == 0 ||
-	   strncmp( instruction, "sw", 2 ) == 0  )
+     strncmp( instruction, "sw", 2 ) == 0  )
     {
       if( sscanf( buffer, "%x %s %s %s %x", 
-		  &instruction_address, 
-		  instruction, 
-		  reg1, 
-		  offsetwithreg, 
-		  &data_address ) != 5)
-	{
-	  printf("Bad instruction: %s at address %x \n", instruction, instruction_address);
-	  exit(-1);
-	}
+      &instruction_address, 
+      instruction, 
+      reg1, 
+      offsetwithreg, 
+      &data_address ) != 5)
+  {
+    printf("Bad instruction: %s at address %x \n", instruction, instruction_address);
+    exit(-1);
+  }
 
       if( strncmp( instruction, "lw", 2 ) == 0)
-	{
+  {
 
-	  dest_reg = iplc_sim_parse_reg( reg1 );
+    dest_reg = iplc_sim_parse_reg( reg1 );
 
-	  // don't need to worry about base regs -- just insert -1 values
-	  iplc_sim_process_pipeline_lw( dest_reg, -1, data_address);
-	}
+    // don't need to worry about base regs -- just insert -1 values
+    iplc_sim_process_pipeline_lw( dest_reg, -1, data_address);
+  }
       if( strncmp( instruction, "sw", 2 ) == 0)
-	{
-	  src_reg = iplc_sim_parse_reg( reg1 );
+  {
+    src_reg = iplc_sim_parse_reg( reg1 );
 
-	  // don't need to worry about base regs -- just insert -1 values
-	  iplc_sim_process_pipeline_sw( src_reg, -1, data_address);
-	}
+    // don't need to worry about base regs -- just insert -1 values
+    iplc_sim_process_pipeline_sw( src_reg, -1, data_address);
+  }
     }
   else if( strncmp( instruction, "beq", 3 ) == 0 )
     {
@@ -631,14 +618,14 @@ void iplc_sim_parse_instruction( char *buffer )
       iplc_sim_process_pipeline_branch(-1, -1);
     }
   else if( strncmp( instruction, "jal", 3 ) == 0 ||
-	   strncmp( instruction, "jr", 2 ) == 0 ||
-	   strncmp( instruction, "j", 1 ) == 0 )
+     strncmp( instruction, "jr", 2 ) == 0 ||
+     strncmp( instruction, "j", 1 ) == 0 )
     {
       iplc_sim_process_pipeline_jump( instruction );
     }
   else if( strncmp( instruction, "jal", 3 ) == 0 ||
-	   strncmp( instruction, "jr", 2 ) == 0 ||
-	   strncmp( instruction, "j", 1 ) == 0 )
+     strncmp( instruction, "jr", 2 ) == 0 ||
+     strncmp( instruction, "j", 1 ) == 0 )
     {
       /*
        * Note: no need to worry about forwarding on the jump register
@@ -657,7 +644,7 @@ void iplc_sim_parse_instruction( char *buffer )
   else
     {
       printf("Do not know how to process instruction: %s at address %x \n",
-	     instruction, instruction_address );
+       instruction, instruction_address );
       exit(-1);
     }
 }
@@ -699,7 +686,7 @@ int main()
     {
       iplc_sim_parse_instruction( buffer );
       if( dump_pipeline )
-	iplc_sim_dump_pipeline();
+  iplc_sim_dump_pipeline();
     }
 
   iplc_sim_finalize();
