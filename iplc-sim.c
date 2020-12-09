@@ -211,7 +211,7 @@ void iplc_sim_LRU_update_on_hit( int index, int assoc )
    cache_line_t newLine = cache[index].assoc[assoc];
    
    // Move all lines down to add new line
-   for (i = assoc+1 < cache_assoc; i++)
+   for (i = assoc+1;i < cache_assoc; i++)
 	{
 	   cache[index].assoc[i-1] = cache[index].assoc[i];
 	}
