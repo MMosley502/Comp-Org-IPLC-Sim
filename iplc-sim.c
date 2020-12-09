@@ -208,7 +208,7 @@ void iplc_sim_LRU_update_on_hit( int index, int assoc )
    int i=0, j=0;
    i = assoc_entry + i;
    // Move to MRU
-   cache_line_t newLine = cache[index].assoc[assoc];
+   assoc_t newLine = cache[index].assoc[assoc];
    
    // Move all lines down to add new line
    for (i < cache_assoc; i++)
@@ -333,36 +333,58 @@ void iplc_sim_push_pipeline_stage()
 
 	// WORK ON THIS
   /* 2. Check for BRANCH and correct/incorrect Branch Prediction */
-  
-			
+  if (pipeline[DECODE].itype == BRANCH && pipeline[FETCH].itype != NOP)
+  {
+		// Checks the next instruction in the pipeline. 
+		// If it's address is current instructions address + 4 the the branch was not taken
+		if (pipeline[DECODE.instruction_address + 4 != pipeline[FETCH.instruction_address) 
+		{
+			branch_taken = 1;
+		}
+		
+		// add delay if branch prediction is incorrrect 
+		if (branch_predict_taken != branch_taken) 
+		{
+			pipeline_cycles++;
+		} else {
+			correct_branch_predictions++;
+		}
+  }
 
   /* 3. Check for LW delays due to use in ALU stage and if data hit/miss  
    *    add delay cycles if needed.
    */
    
-   if(pipeline[ALU].itype == LW)
+   if(pipeline[MEM].itype == LW)
+	{
+			// add delay if destination register is being used in the ALU stage 
+		if (pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg1 || 
+			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg2_or_constant ||
+			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.sw.data_address ||
+			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.sw.base_reg ||
+			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.lw.data_address ||
+			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.lw.base_reg)
 		{
-			// this should check for ALU delays but i'm not certain.
-		if (pipeline[DECODE].stage.reg1 == pipeline[ALU].stage.dest_reg || 
-			pipeline[DECODE].stage.reg2 == pipeline[ALU].stage.dest_reg ||
-			pipeline[DECODE].stage.reg1 == pipeline[MEM].stage.dest_reg ||
-			pipeline[DECODE].stage.reg2 == pipeline[MEM].stage.dest_reg)
-			{
-			pipeline_cycles += CACHE_MISS_DELAY - 1;
-			}
+			inserted_nop = 1;
 	    }
-	if(pipeline[MEM].itype == LW)
-		{
+		
+		
+		
+		// check for data miss and add delay if necessary 
+	
 		if(!iplc_sim_trap_address(pipeline[MEM].stage.lw.data_address))
-			{
-			pipeline_cycles += CACHE_MISS_DELAY - 1;
+		{
+			inserted_nop = CACHE_MISS_DELAY - 1;
 			//Need to add debug here?
 			if (debug) 
-				{
+			{
 				printf("Data miss at Address 0x%a\n", pipeline[MEM].stage.lw.data_address);
-				}
 			}
 		}
+		
+		pipeline_cycles += inserted_nop;
+		
+	}
   /* 4. Check for SW mem acess and data miss .. add delay cycles if needed */
   // Should this be WRITEBACK?
 	if(pipeline[MEM].itype == SW)
