@@ -337,7 +337,7 @@ void iplc_sim_push_pipeline_stage()
   {
 		// Checks the next instruction in the pipeline. 
 		// If it's address is current instructions address + 4 the the branch was not taken
-		if (pipeline[DECODE.instruction_address + 4 != pipeline[FETCH.instruction_address) 
+		if (pipeline[DECODE].instruction_address + 4 != pipeline[FETCH].instruction_address) 
 		{
 			branch_taken = 1;
 		}
@@ -358,12 +358,12 @@ void iplc_sim_push_pipeline_stage()
    if(pipeline[MEM].itype == LW)
 	{
 			// add delay if destination register is being used in the ALU stage 
-		if (pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg1 || 
-			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg2_or_constant ||
-			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.sw.data_address ||
-			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.sw.base_reg ||
-			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.lw.data_address ||
-			pipeline{MEM}.stage.lw.dest_reg == pipeline[ALU].stage.lw.base_reg)
+		if (pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg1 || 
+			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.rtype.reg2_or_constant ||
+			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.data_address ||
+			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.sw.base_reg ||
+			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.data_address ||
+			pipeline[MEM].stage.lw.dest_reg == pipeline[ALU].stage.lw.base_reg)
 		{
 			inserted_nop = 1;
 	    }
@@ -619,31 +619,9 @@ void iplc_sim_parse_instruction( char *buffer )
 	}
       if( strncmp( instruction, "sw", 2 ) == 0)
 	{
-	  src_reg = iplc_sim_parse_reg( reg1 );
-
-	  // don't need to worry about base regs -- just insert -1 values
-	  iplc_sim_process_pipeline_sw( src_reg, -1, data_address);
-	}
-    }
-  else if( strncmp( instruction, "beq", 3 ) == 0 )
-    {
-      // don't need to worry about getting regs -- just insert -1 values
-      iplc_sim_process_pipeline_branch(-1, -1);
-    }
-  else if( strncmp( instruction, "jal", 3 ) == 0 ||
-	   strncmp( instruction, "jr", 2 ) == 0 ||
-	   strncmp( instruction, "j", 1 ) == 0 )
-    {
-      iplc_sim_process_pipeline_jump( instruction );
-    }
-  else if( strncmp( instruction, "jal", 3 ) == 0 ||
-	   strncmp( instruction, "jr", 2 ) == 0 ||
-	   strncmp( instruction, "j", 1 ) == 0 )
-    {
-      /*
-       * Note: no need to worry about forwarding on the jump register
-       * we'll let that one go.
-       */
+       // Note: no need to worry about forwarding on the jump register
+       //we'll let that one go.
+       
       iplc_sim_process_pipeline_jump( instruction );
     }
   else if( strncmp( instruction, "syscall", 7 ) == 0)
@@ -660,6 +638,7 @@ void iplc_sim_parse_instruction( char *buffer )
 	     instruction, instruction_address );
       exit(-1);
     }
+}
 }
 
 /************************************************************************************************/
