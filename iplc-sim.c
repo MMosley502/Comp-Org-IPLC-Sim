@@ -194,7 +194,7 @@ void iplc_sim_LRU_replace_on_miss( int index, int tag )
    int i=0, j=0;
 
    /* Note: item 0 is the least recently used cache slot -- so replace it */
-   for (i < cache_assoc; i++)
+   for (i= 1; i < cache_assoc; i++)
 	{
 		cache[index].assoc[i] = cache[index].assoc[i+1];
 	}
@@ -206,12 +206,12 @@ void iplc_sim_LRU_replace_on_miss( int index, int tag )
 void iplc_sim_LRU_update_on_hit( int index, int assoc )
 {
    int i=0, j=0;
-   i = assoc_entry + i;
+  
    // Move to MRU
    cache_line_t newLine = cache[index].assoc[assoc];
    
    // Move all lines down to add new line
-   for (i < cache_assoc; i++)
+   for (i = assoc+1 < cache_assoc; i++)
 	{
 	   cache[index].assoc[i-1] = cache[index].assoc[i];
 	}
@@ -235,10 +235,10 @@ int iplc_sim_trap_address( unsigned int address )
    tag = address >> (cache_blockoffsetbits + cache_index);
    
    // check associated 
-   for (i < cache_assoc; i++)
+   for (i = 0; i < cache_assoc; i++)
    {
 		// Determines cache hit
-		if (cache[index].assoc[i].vb && cache[index].asoc[i].tag == tag)
+		if (cache[index].assoc[i].vb && cache[index].assoc[i].tag == tag)
 		{			
 			iplc_sim_LRU_update_on_hit(index, i);
 			cache_hit++;
