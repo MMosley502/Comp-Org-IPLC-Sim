@@ -194,7 +194,7 @@ void iplc_sim_LRU_replace_on_miss( int index, int tag )
    int i=0, j=0;
 
    /* Note: item 0 is the least recently used cache slot -- so replace it */
-   for (i < cache_assoc; i++;)
+   for (i = 0; i < cache_assoc; i++)
 	{
 		cache[index].assoc[i] = cache[index].assoc[i+1];
 	}
@@ -211,7 +211,7 @@ void iplc_sim_LRU_update_on_hit( int index, int assoc )
    assoc_t newLine = cache[index].assoc[assoc];
    
    // Move all lines down to add new line
-   for (i < cache_assoc; i++;)
+   for (i = assoc + i; i < cache_assoc; i++)
 	{
 	   cache[index].assoc[i-1] = cache[index].assoc[i];
 	}
@@ -235,7 +235,7 @@ int iplc_sim_trap_address( unsigned int address )
    tag = address >> (cache_blockoffsetbits + cache_index);
    
    // check associated 
-   for (i < cache_assoc; i++;)
+   for (i = 0; i < cache_assoc; i++)
    {
 		// Determines cache hit
 		if (cache[index].assoc[i].vb && cache[index].assoc[i].tag == tag)
@@ -619,9 +619,31 @@ void iplc_sim_parse_instruction( char *buffer )
 	}
       if( strncmp( instruction, "sw", 2 ) == 0)
 	{
-       // Note: no need to worry about forwarding on the jump register
-       //we'll let that one go.
-       
+	  src_reg = iplc_sim_parse_reg( reg1 );
+
+	  // don't need to worry about base regs -- just insert -1 values
+	  iplc_sim_process_pipeline_sw( src_reg, -1, data_address);
+	}
+    }
+  else if( strncmp( instruction, "beq", 3 ) == 0 )
+    {
+      // don't need to worry about getting regs -- just insert -1 values
+      iplc_sim_process_pipeline_branch(-1, -1);
+    }
+  else if( strncmp( instruction, "jal", 3 ) == 0 ||
+	   strncmp( instruction, "jr", 2 ) == 0 ||
+	   strncmp( instruction, "j", 1 ) == 0 )
+    {
+      iplc_sim_process_pipeline_jump( instruction );
+    }
+  else if( strncmp( instruction, "jal", 3 ) == 0 ||
+	   strncmp( instruction, "jr", 2 ) == 0 ||
+	   strncmp( instruction, "j", 1 ) == 0 )
+    {
+      /*
+       * Note: no need to worry about forwarding on the jump register
+       * we'll let that one go.
+       */
       iplc_sim_process_pipeline_jump( instruction );
     }
   else if( strncmp( instruction, "syscall", 7 ) == 0)
@@ -638,7 +660,6 @@ void iplc_sim_parse_instruction( char *buffer )
 	     instruction, instruction_address );
       exit(-1);
     }
-}
 }
 
 /************************************************************************************************/
