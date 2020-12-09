@@ -333,7 +333,9 @@ void iplc_sim_push_pipeline_stage()
 	// WORK ON THIS
   /* 2. Check for BRANCH and correct/incorrect Branch Prediction */
   if (pipeline[DECODE].itype == BRANCH && pipeline[FETCH].itype != NOP)
-  {
+  {	
+		// adds branch count
+		branch_count++;
 		// Checks the next instruction in the pipeline. 
 		// If it's address is current instructions address + 4 the the branch was not taken
 		if (pipeline[DECODE].instruction_address + 4 != pipeline[FETCH].instruction_address) 
