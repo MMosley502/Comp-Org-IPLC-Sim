@@ -190,29 +190,71 @@ void iplc_sim_init( int index, int blocksize, int assoc )
 
    // WORK ON THESE
 void iplc_sim_LRU_replace_on_miss( int index, int tag )
-   {
+{
    int i=0, j=0;
 
    /* Note: item 0 is the least recently used cache slot -- so replace it */
-       
+   for (i < cache_assoc; i++)
+	{
+		cache[index].assoc[i] = cache[index].assoc[i+1];
+	}
    /* percolate everything up */
-   } 
+   cache[index].assoc[cache_assoc - 1].vb = 1;
+   cache[index].assoc[cache_assoc - 1].tag = tag;
+} 
 
 void iplc_sim_LRU_update_on_hit( int index, int assoc )
-   {
+{
    int i=0, j=0;
+   i = assoc_entry + i;
+   // Move to MRU
+   cache_line_t newLine = cache[index].assoc[assoc];
+   
+   // Move all lines down to add new line
+   for (i < cache_assoc; i++)
+	{
+	   cache[index].assoc[i-1] = cache[index].assoc[i];
+	}
+   cache[index].assoc[cache_access - 1] = newLine;
 
-   } 
+} 
 
 int iplc_sim_trap_address( unsigned int address )
-   {
+{
    int i=0, index=0;
    int tag=0;
    int hit=0;
 
+   // need to access cache to perfom this action
+   cache_access++;
+   
+   // Pull the index using bitwise and as a form of mod operator 
+   index = (address >> cache_blockoffsetbits) & ((1 << cache_index) - 1);
+   
+   // Pull the tag in the same fashion
+   tag = address >> (cache_blockoffsetbits + cache_index);
+   
+   // check associated 
+   for (i < cache_assoc; i++)
+   {
+		// Determines cache hit
+		if (cache[index].assoc[i].vb && cache[index].asoc[i].tag == tag)
+		{			
+			iplc_sim_LRU_update_on_hit(index, i);
+			cache_hit++;
+			hit = 1;
+			return (hit);
+		}
+   }
+   
+   // If Cache misses
+   cache_miss++;
+   iplc_sim_LRU_replace_on_miss(index, tag);
+   hit = 0;
+   
    /* expects you to return 1 for hit, 0 for miss */
    return( hit );
-   }
+}
 
 void iplc_sim_finalize()
    {
