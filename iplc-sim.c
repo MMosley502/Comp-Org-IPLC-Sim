@@ -426,36 +426,33 @@ void iplc_sim_process_pipeline_rtype( char *instruction, int dest_reg, int reg1,
   pipeline[FETCH].stage.rtype.reg2_or_constant = reg2_or_constant;
   pipeline[FETCH].stage.rtype.dest_reg = dest_reg;
 }
-// WORK ON THESE
+
 void iplc_sim_process_pipeline_lw( int dest_reg, int base_reg, unsigned int data_address)
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
   
   pipeline[FETCH].itype = LW;
   pipeline[FETCH].instruction_address = instruction_address;
   
-  pipeline[FETCH].stage.lw.data_address = data_address;
   pipeline[FETCH].stage.lw.dest_reg = dest_reg;
   pipeline[FETCH].stage.lw.base_reg = base_reg; 
+  pipeline[FETCH].stage.lw.data_address = data_address;	
 }
 
 void iplc_sim_process_pipeline_sw( int src_reg, int base_reg, unsigned int data_address)
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
   
   pipeline[FETCH].itype = SW;
   pipeline[FETCH].instruction_address = instruction_address;
   
-  pipeline[FETCH].stage.sw.data_address = data_address;
   pipeline[FETCH].stage.sw.src_reg = src_reg;
   pipeline[FETCH].stage.sw.base_reg = base_reg;
+  pipeline[FETCH].stage.sw.data_address = data_address;	
 }
 
 void iplc_sim_process_pipeline_branch( int reg1, int reg2)
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
   
   pipeline[FETCH].itype = BRANCH;
@@ -467,7 +464,6 @@ void iplc_sim_process_pipeline_branch( int reg1, int reg2)
 
 void iplc_sim_process_pipeline_jump( char *instruction )
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
 
   pipeline[FETCH].itype = JUMP;
@@ -478,7 +474,6 @@ void iplc_sim_process_pipeline_jump( char *instruction )
 
 void iplc_sim_process_pipeline_syscall( )
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
 
   pipeline[FETCH].itype = SYSCALL;
@@ -487,7 +482,6 @@ void iplc_sim_process_pipeline_syscall( )
 
 void iplc_sim_process_pipeline_nop( )
 {
-  /* you gotta do this one */
   iplc_sim_push_pipeline_stage();
 
   pipeline[FETCH].itype = NOP;
